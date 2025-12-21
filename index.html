@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Crédito Premium</title>
+    <meta name="description" content="Simulação avançada de crédito e juros com tabelas de amortização detalhadas.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span>SimuladorPro</span>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#home" class="nav-link active" data-target="view-home">Home</a>
+                <a href="#simulator" class="nav-link" data-target="view-simulator">Crédito</a>
+                <a href="#comparator" class="nav-link" data-target="view-comparator">Amortização</a>
+            </nav>
+
+            <div class="theme-toggle">
+                <!-- Theme toggle button will be here -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- VIEW: HOME / DASHBOARD -->
+            <div id="view-home" class="app-view app-dashboard-view active">
+                <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
+                    <header style="text-align: center; margin-bottom: 48px;">
+                        <h2 style="font-size: 2rem; margin-bottom: 12px;">Bem-vindo ao SimuladorPro</h2>
+                        <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                            Ferramentas avançadas para gestão financeira do seu crédito habitação.
+                        </p>
+                    </header>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px;">
+                        <!-- Card Simulator -->
+                        <div class="card" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+                            onclick="document.querySelector('[data-target=view-simulator]').click()"
+                            onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 20px rgba(0,0,0,0.1)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 16px;">🏦</div>
+                            <h3 style="font-size: 1.3rem; margin-bottom: 8px; color: var(--text-primary);">Simulador de
+                                Crédito</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                                Calcule a sua prestação mensal, juros totais e visualize o plano de amortização
+                                detalhado.
+                            </p>
+                            <span style="color: var(--accent-color); font-weight: 600;">Abrir Simulador →</span>
+                        </div>
+
+                        <!-- Card Amortization -->
+                        <div class="card" style="cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;"
+                            onclick="document.querySelector('[data-target=view-comparator]').click()"
+                            onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 20px rgba(0,0,0,0.1)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-md)'">
+                            <div style="font-size: 2.5rem; margin-bottom: 16px;">📈</div>
+                            <h3 style="font-size: 1.3rem; margin-bottom: 8px; color: var(--text-primary);">Amortização &
+                                Renegociação</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 16px;">
+                                Simule o impacto de amortizações únicas, reforços mensais ou renegociação de taxas e
+                                prazos.
+                            </p>
+                            <span style="color: var(--accent-color); font-weight: 600;">Abrir Comparador →</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: CREDIT SIMULATOR -->
+            <div id="view-simulator" class="app-view">
+                <aside class="sidebar">
+                    <h2>Parâmetros do Crédito</h2>
+                    <form id="loan-form">
+                        <div class="form-group">
+                            <label for="amount">Montante do Empréstimo (€)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="amount" value="150000" min="0" step="1000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo de Taxa</label>
+                            <div class="rate-type-toggle">
+                                <input type="radio" name="rate-type" id="rate-fixed" value="fixed" checked>
+                                <label for="rate-fixed" class="toggle-btn">Fixa</label>
+
+                                <input type="radio" name="rate-type" id="rate-variable" value="variable">
+                                <label for="rate-variable" class="toggle-btn">Variável</label>
+                            </div>
+                        </div>
+
+                        <div id="fixed-rate-group" class="form-group fade-in">
+                            <label for="rate">Taxa de Juro Anual (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rate" value="3.5" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <div id="variable-rate-group" class="form-group hidden fade-in">
+                            <label for="euribor-select">Euribor</label>
+                            <select id="euribor-select">
+                                <!-- Options injected by JS -->
+                            </select>
+
+                            <label for="spread" style="margin-top: 8px">Spread (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="spread" value="1.0" min="0" step="0.05">
+                            </div>
+
+                            <div class="total-rate-display">
+                                <span>Taxa Total Estimada:</span>
+                                <strong id="total-variable-rate">--%</strong>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="term">Prazo (Meses)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="term" value="360" min="1" max="600">
+                            </div>
+                            <input type="range" id="term-range" min="1" max="600" value="360" class="slider">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="start-date">Data de Início</label>
+                            <input type="date" id="start-date">
+                        </div>
+                    </form>
+                </aside>
+
+                <section class="results-area">
+                    <div class="summary-cards">
+                        <div class="card highlight">
+                            <h3>Prestação Mensal</h3>
+                            <p class="value" id="monthly-payment">€0.00</p>
+                        </div>
+                        <div class="card">
+                            <h3>Total de Juros</h3>
+                            <p class="value" id="total-interest">€0.00</p>
+                        </div>
+                        <div class="card">
+                            <h3>Montante Total</h3>
+                            <p class="value" id="total-amount">€0.00</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-container generic-box">
+                        <h3>Distribuição de Custos</h3>
+                        <!-- Simple CSS bar chart or canvas goes here -->
+                        <div class="bar-chart-wrapper">
+                            <div class="bar-segment principal" id="bar-principal" style="width: 70%"></div>
+                            <div class="bar-segment interest" id="bar-interest" style="width: 30%"></div>
+                        </div>
+                        <div class="legend">
+                            <span class="dot principal"></span> Capital (<span id="legend-principal-pct">0%</span>)
+                            <span class="dot interest"></span> Juros (<span id="legend-interest-pct">0%</span>)
+                        </div>
+                    </div>
+
+                    <div class="table-container generic-box">
+                        <div class="table-header-ui">
+                            <h3>Plano de Amortização</h3>
+                            <button id="export-btn" class="btn-secondary">Exportar CSV</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Data</th>
+                                        <th>Prestação</th>
+                                        <th>Juros</th>
+                                        <th>Amortização</th>
+                                        <th>Capital em Dívida</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedule-body">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- VIEW: COMPARATOR (AMORTIZATION) -->
+            <div id="view-comparator" class="app-view">
+                <aside class="sidebar">
+                    <h2>Simulador de Renegociação</h2>
+                    <form id="loan-form-comp">
+                        <!-- SECTION 1: Current Contract Data -->
+                        <div class="form-section-header"
+                            style="margin-bottom:12px; border-bottom:1px solid var(--border-color); padding-bottom:4px;">
+                            <h3 style="font-size:0.9rem; color:var(--text-secondary); text-transform:uppercase;">1.
+                                Contrato Atual</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="amount_comp">Capital em Dívida (€)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="amount_comp" value="150000" min="0" step="1000">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo de Taxa Atual</label>
+                            <div class="rate-type-toggle">
+                                <input type="radio" name="rate-type_comp" id="rate-fixed_comp" value="fixed" checked>
+                                <label for="rate-fixed_comp" class="toggle-btn">Fixa</label>
+
+                                <input type="radio" name="rate-type_comp" id="rate-variable_comp" value="variable">
+                                <label for="rate-variable_comp" class="toggle-btn">Variável</label>
+                            </div>
+                        </div>
+
+                        <!-- Current Rate Inputs -->
+                        <div id="fixed-rate-group_comp" class="form-group fade-in">
+                            <label for="rate_comp">Taxa Atual (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="rate_comp" value="3.5" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <div id="variable-rate-group_comp" class="form-group hidden fade-in">
+                            <label for="euribor-select_comp">Euribor Atual</label>
+                            <select id="euribor-select_comp">
+                                <!-- Options injected by JS -->
+                            </select>
+                            <label for="spread_comp" style="margin-top: 8px">Spread Atual (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="spread_comp" value="1.0" min="0" step="0.05">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="term_comp">Prazo Atual Restante (Meses)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="term_comp" value="360" min="1" max="600">
+                            </div>
+                        </div>
+
+                        <!-- SECTION 2: New Simulation Params -->
+                        <div class="form-section-header"
+                            style="margin:24px 0 12px 0; border-bottom:1px solid var(--border-color); padding-bottom:4px;">
+                            <h3
+                                style="font-size:0.9rem; color:var(--accent-color); font-weight:700; text-transform:uppercase;">
+                                2. Novo Cenário</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="one-off-amort_comp">Amortização Única (€)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="one-off-amort_comp" value="0" min="0" step="1000"
+                                    style="border-color: var(--success-color);">
+                            </div>
+                            <small style="color:var(--text-secondary); font-size:0.75rem;">Abatido ao capital
+                                imediatamente.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-term_input_comp">Novo Prazo (Meses)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="new-term_input_comp" value="360" min="1" max="600"
+                                    style="border-color: var(--accent-color);">
+                            </div>
+                            <small style="color:var(--text-secondary); font-size:0.75rem;">Deixe igual para
+                                manter.</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new-spread_comp">Novo Spread / Taxa Fixa (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="new-spread_comp" value="1.0" min="0" step="0.05"
+                                    style="border-color: var(--accent-color);">
+                            </div>
+                            <small style="color:var(--text-secondary); font-size:0.75rem;">Novo Spread (se Variável) ou
+                                Nova Taxa (se Fixa).</small>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 12px;">
+                            <label for="extra-monthly_comp">Reforço Mensal Recorrente (€)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="extra-monthly_comp" value="0" min="0" step="50"
+                                    style="border-color: var(--success-color);">
+                            </div>
+                            <small style="color:var(--text-secondary); font-size:0.75rem;">Somado à nova prestação
+                                mensalmente.</small>
+                        </div>
+                    </form>
+                </aside>
+
+                <section class="results-area">
+                    <div class="summary-cards">
+                        <div class="card highlight">
+                            <h3>Nova Prestação (Simulada)</h3>
+                            <p class="value" id="monthly-payment_comp">€0.00</p>
+                            <small id="monthly-payment-diff_comp" style="font-size: 0.8rem;">(+0.00)</small>
+                        </div>
+                        <div class="card">
+                            <h3>Poupança em Juros</h3>
+                            <p class="value" id="total-interest_comp">€0.00</p>
+                            <small id="total-interest-diff_comp" class="diff-good">(-0.00)</small>
+                        </div>
+                        <div class="card">
+                            <h3>Novo Prazo Estimado</h3>
+                            <p class="value" id="new-term_comp">360 meses</p>
+                            <small id="term-diff_comp" class="diff-good">(-0 meses)</small>
+                        </div>
+                    </div>
+
+                    <div class="table-container generic-box">
+                        <div class="table-header-ui">
+                            <h3>Comparativo de Amortização</h3>
+                            <small>Valores em parêntesis representam a diferença face ao cenário original.</small>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Prestação (Dif)</th>
+                                        <th>Juros (Dif)</th>
+                                        <th>Amortização (Dif)</th>
+                                        <th>Dívida (Dif)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="schedule-body_comp">
+                                    <!-- Rows generated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>Desenhado e Construído por <a href="https://carlosandrade.eu" target="_blank">Carlos Andrade</a></p>
+            <p>&copy; 2025 carlosandrade.eu</p>
+        </footer>
+    </div>
+    <script>
+        // Define global callback for JSONP first
+        window.updateEuriborRates = function (data) {
+            // Dispatch a custom event so our main logic can handle it
+            const event = new CustomEvent('euribor-updated', { detail: data });
+            document.dispatchEvent(event);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // === ELEMENTS ===
+            const amountInput = document.getElementById('amount');
+            const termInput = document.getElementById('term');
+            const termRange = document.getElementById('term-range');
+            const startDateInput = document.getElementById('start-date');
+
+            // Rate Toggles & Inputs
+            const rateFixedRadio = document.getElementById('rate-fixed');
+            const rateVariableRadio = document.getElementById('rate-variable');
+            const fixedRateGroup = document.getElementById('fixed-rate-group');
+            const variableRateGroup = document.getElementById('variable-rate-group');
+
+            // Check if critical elements exist before proceeding
+            if (!rateFixedRadio || !rateVariableRadio || !fixedRateGroup || !variableRateGroup) {
+                console.error("Critical elements missing");
+                // Fallback attempt to find by class if IDs fail
+                return;
+            }
+
+            const fixedRateInput = document.getElementById('rate');
+            const spreadInput = document.getElementById('spread');
+            const euriborSelect = document.getElementById('euribor-select');
+            const totalVariableRateDisplay = document.getElementById('total-variable-rate');
+
+            const monthlyPaymentEl = document.getElementById('monthly-payment');
+            const totalInterestEl = document.getElementById('total-interest');
+            const totalAmountEl = document.getElementById('total-amount');
+            const scheduleBody = document.getElementById('schedule-body');
+            const exportBtn = document.getElementById('export-btn');
+
+            const barPrincipal = document.getElementById('bar-principal');
+            const barInterest = document.getElementById('bar-interest');
+            const legendPrincipalPct = document.getElementById('legend-principal-pct');
+            const legendInterestPct = document.getElementById('legend-interest-pct');
+
+            // === STATE ===
+            let currentEuriborRates = [
+                { label: 'Euribor 1 Semana (1.917%)', value: 1.917 },
+                { label: 'Euribor 1 Mês (1.908%)', value: 1.908 },
+                { label: 'Euribor 3 Meses (2.002%)', value: 2.002 },
+                { label: 'Euribor 6 Meses (2.126%)', value: 2.126 },
+                { label: 'Euribor 12 Meses (2.266%)', value: 2.266 }
+            ];
+
+            startDateInput.valueAsDate = new Date();
+
+            // === FUNCTIONS ===
+
+            const refreshEuriborSelects = () => {
+                const selects = [
+                    document.getElementById('euribor-select'),
+                    document.getElementById('euribor-select_comp')
+                ];
+
+                selects.forEach(sel => {
+                    if (!sel) return;
+                    const currentVal = sel.value;
+                    sel.innerHTML = '';
+                    currentEuriborRates.forEach(rate => {
+                        const option = document.createElement('option');
+                        option.value = rate.value;
+                        option.textContent = rate.label;
+                        sel.appendChild(option);
+                    });
+
+                    // Restore or set default (6 months)
+                    const match = currentEuriborRates.find(r => String(r.value) === String(currentVal));
+                    if (match) {
+                        sel.value = match.value;
+                    } else {
+                        if (currentEuriborRates.length > 3) sel.value = currentEuriborRates[3].value;
+                    }
+                });
+
+                if (typeof calculate === 'function') calculate();
+                if (typeof calculateComp === 'function') calculateComp();
+            };
+
+            const showToast = (message, isError = false) => {
+                const toast = document.createElement('div');
+                toast.className = `toast ${isError ? 'error' : 'success'}`;
+                toast.textContent = message;
+
+                Object.assign(toast.style, {
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    padding: '12px 24px',
+                    backgroundColor: isError ? '#ef4444' : '#22c55e',
+                    color: 'white',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                    zIndex: '9999',
+                    opacity: '0',
+                    transition: 'opacity 0.3s',
+                    fontFamily: 'sans-serif'
+                });
+
+                document.body.appendChild(toast);
+                requestAnimationFrame(() => toast.style.opacity = '1');
+
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            };
+
+            const formatMoney = (value) => {
+                return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(value);
+            };
+
+            const getActiveAnnualRate = () => {
+                if (rateFixedRadio.checked) {
+                    return parseFloat(fixedRateInput.value) || 0;
+                } else {
+                    const spread = parseFloat(spreadInput.value) || 0;
+                    const euribor = parseFloat(euriborSelect.value) || 0;
+                    return spread + euribor;
+                }
+            };
+
+            const calculate = () => {
+                const P = parseFloat(amountInput.value);
+                const annualRate = getActiveAnnualRate();
+                const termMonths = parseFloat(termInput.value);
+
+                if (rateVariableRadio.checked) {
+                    totalVariableRateDisplay.textContent = `${annualRate.toFixed(3)}%`;
+                }
+
+                if (isNaN(P) || isNaN(annualRate) || isNaN(termMonths)) return;
+
+                const r = annualRate / 100 / 12;
+                const n = termMonths;
+
+                let monthlyPayment = 0;
+                if (annualRate === 0) {
+                    monthlyPayment = P / n;
+                } else {
+                    monthlyPayment = P * (r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+                }
+
+                const totalPayment = monthlyPayment * n;
+                const totalInterest = totalPayment - P;
+
+                monthlyPaymentEl.textContent = formatMoney(monthlyPayment);
+                totalInterestEl.textContent = formatMoney(totalInterest);
+                totalAmountEl.textContent = formatMoney(totalPayment);
+
+                // Chart Update
+                const total = P + totalInterest;
+                let pPercent = 0;
+                let iPercent = 0;
+                if (total > 0) {
+                    pPercent = (P / total) * 100;
+                    iPercent = (totalInterest / total) * 100;
+                }
+                barPrincipal.style.width = `${pPercent}%`;
+                barInterest.style.width = `${iPercent}%`;
+                legendPrincipalPct.textContent = `${pPercent.toFixed(1)}%`;
+                legendInterestPct.textContent = `${iPercent.toFixed(1)}%`;
+
+                renderTable(P, r, n, monthlyPayment);
+            };
+
+            const renderTable = (P, r, n, pmt) => {
+                let balance = P;
+                let html = '';
+                let date = new Date(startDateInput.value);
+
+                for (let i = 1; i <= n; i++) {
+                    const interest = balance * r;
+                    let principal = pmt - interest;
+
+                    if (i === n) principal = balance;
+
+                    balance -= principal;
+                    if (balance < 0.01) balance = 0;
+
+                    date.setMonth(date.getMonth() + 1);
+                    const dateStr = date.toLocaleDateString('pt-PT');
+
+                    html += `
+                        <tr>
+                            <td>${i}</td>
+                            <td>${dateStr}</td>
+                            <td>${formatMoney(pmt)}</td>
+                            <td>${formatMoney(interest)}</td>
+                            <td>${formatMoney(principal)}</td>
+                            <td>${formatMoney(balance)}</td>
+                        </tr>
+                    `;
+                    if (balance <= 0) break;
+                }
+                scheduleBody.innerHTML = html;
+            };
+
+            const fetchRates = () => {
+                const script = document.createElement('script');
+                script.src = 'https://api.allorigins.win/get?url=https://www.euribor-rates.eu/pt/taxas-euribor-actuais/&callback=updateEuriborRates';
+                script.onerror = () => console.warn('JSONP fetch failed');
+                document.body.appendChild(script);
+            };
+
+            // Handle JSONP Response via Event
+            document.addEventListener('euribor-updated', (e) => {
+                const data = e.detail;
+                try {
+                    if (!data || !data.contents) throw new Error('No data');
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data.contents, 'text/html');
+
+                    const map = [
+                        { key: '1 semana', labelBase: 'Euribor 1 Semana' },
+                        { key: '1 mês', labelBase: 'Euribor 1 Mês' },
+                        { key: '3 meses', labelBase: 'Euribor 3 Meses' },
+                        { key: '6 meses', labelBase: 'Euribor 6 Meses' },
+                        { key: '12 meses', labelBase: 'Euribor 12 Meses' }
+                    ];
+
+                    const rows = Array.from(doc.querySelectorAll('tr'));
+                    const newRates = [];
+
+                    map.forEach(item => {
+                        const row = rows.find(r => r.textContent.toLowerCase().includes(item.key.toLowerCase()));
+                        if (row) {
+                            const tds = row.querySelectorAll('td');
+                            if (tds.length >= 2) {
+                                const valueText = tds[1].textContent.trim();
+                                const val = parseFloat(valueText.replace('%', '').replace(',', '.').trim());
+                                if (!isNaN(val)) {
+                                    newRates.push({
+                                        label: `${item.labelBase} (${val}%)`,
+                                        value: val
+                                    });
+                                }
+                            }
+                        }
+                    });
+
+                    if (newRates.length > 0) {
+                        currentEuriborRates = newRates;
+                        refreshEuriborSelects();
+                        showToast('Taxas Euribor atualizadas (Live)!');
+                    }
+                } catch (err) {
+                    console.warn('Scraping error:', err);
+                }
+            });
+
+            // === TOGGLE LOGIC (Direct Style Manipulation) ===
+            const updateRateVisibility = () => {
+                // Remove hidden class AND set display explicitly
+                if (rateFixedRadio.checked) {
+                    fixedRateGroup.classList.remove('hidden');
+                    fixedRateGroup.style.display = 'flex';
+
+                    variableRateGroup.classList.add('hidden');
+                    variableRateGroup.style.display = 'none';
+                } else {
+                    fixedRateGroup.classList.add('hidden');
+                    fixedRateGroup.style.display = 'none';
+
+                    variableRateGroup.classList.remove('hidden');
+                    variableRateGroup.style.display = 'block'; // Or flex/block depending on layout
+                }
+                calculate();
+            };
+
+            // === INIT & LISTENERS ===
+            rateFixedRadio.addEventListener('change', updateRateVisibility);
+            rateVariableRadio.addEventListener('change', updateRateVisibility);
+
+            // Container listener for bubbling
+            const toggleContainer = document.querySelector('.rate-type-toggle');
+            if (toggleContainer) {
+                toggleContainer.addEventListener('change', (e) => {
+                    // Slight delay to ensure radio checked state updates
+                    setTimeout(updateRateVisibility, 0);
+                });
+            }
+
+            // Labels click handler (extra safety)
+            document.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Find the input ID this label is for
+                    const forId = btn.getAttribute('for');
+                    const input = document.getElementById(forId);
+                    if (input) {
+                        input.checked = true;
+                        input.dispatchEvent(new Event('change'));
+                        updateRateVisibility();
+                    }
+                });
+            });
+
+            [amountInput, fixedRateInput, termInput, startDateInput, spreadInput, euriborSelect].forEach(el => {
+                if (el) el.addEventListener('input', calculate);
+            });
+
+            if (termRange) {
+                termRange.addEventListener('input', (e) => {
+                    termInput.value = e.target.value;
+                    calculate();
+                });
+            }
+
+            if (termInput) {
+                termInput.addEventListener('input', (e) => {
+                    termRange.value = e.target.value;
+                });
+            }
+
+            // === NAVIGATION LOGIC ===
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Update Active Link
+                    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    // Switch Views
+                    const targetId = link.getAttribute('data-target');
+                    document.querySelectorAll('.app-view').forEach(view => {
+                        view.classList.remove('active');
+                        if (view.id === targetId) {
+                            view.classList.add('active');
+                        }
+                    });
+                });
+            });
+
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    const rows = [];
+                    rows.push(['#', 'Data', 'Prestação', 'Juros', 'Amortização', 'Capital em Dívida']);
+                    const trs = scheduleBody.querySelectorAll('tr');
+                    trs.forEach(tr => {
+                        const rowData = [];
+                        tr.querySelectorAll('td').forEach(td => rowData.push(td.innerText));
+                        rows.push(rowData);
+                    });
+
+                    const csvContent = "data:text/csv;charset=utf-8,"
+                        + rows.map(e => e.join(";")).join("\n");
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", "simulacao_credito.csv");
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            }
+
+            // === COMPARATOR APP LOGIC ===
+            const calculateComp = () => {
+                // --- SCENARIO A: CURRENT CONTRACT ---
+                const P_base = parseFloat(document.getElementById('amount_comp').value) || 0;
+                const term_base = parseFloat(document.getElementById('term_comp').value) || 360;
+
+                // Base Rate Logic
+                let rate_base = 0;
+                let isFixedBase = document.getElementById('rate-fixed_comp').checked;
+                let euriborVal = parseFloat(document.getElementById('euribor-select_comp').value) || 0;
+
+                if (isFixedBase) {
+                    rate_base = parseFloat(document.getElementById('rate_comp').value) || 0;
+                } else {
+                    const spread_base = parseFloat(document.getElementById('spread_comp').value) || 0;
+                    rate_base = spread_base + euriborVal;
+                }
+
+                // Calc Base Payment (Current PMT)
+                const r_base = rate_base / 100 / 12;
+                let pmt_base = 0;
+                if (rate_base === 0) pmt_base = P_base / term_base;
+                else pmt_base = P_base * (r_base * Math.pow(1 + r_base, term_base)) / (Math.pow(1 + r_base, term_base) - 1);
+
+                const total_payment_base = pmt_base * term_base;
+                const total_interest_base = total_payment_base - P_base;
+
+                // --- SCENARIO B: NEW / RENEGOTIATED ---
+                const oneOffAmort = parseFloat(document.getElementById('one-off-amort_comp').value) || 0;
+                let term_new = parseFloat(document.getElementById('new-term_input_comp').value);
+                if (!term_new || term_new <= 0) term_new = term_base;
+
+                const newSpreadOrRate = parseFloat(document.getElementById('new-spread_comp').value) || 0;
+                const extraMonthly = parseFloat(document.getElementById('extra-monthly_comp').value) || 0;
+
+                // New Principal
+                let P_new = P_base - oneOffAmort;
+                if (P_new < 0) P_new = 0;
+
+                // New Rate
+                let rate_new = 0;
+                if (isFixedBase) {
+                    rate_new = newSpreadOrRate;
+                } else {
+                    rate_new = euriborVal + newSpreadOrRate;
+                }
+
+                // Calc New "Required" Payment
+                const r_new = rate_new / 100 / 12;
+                let pmt_new_recalc = 0;
+                if (P_new > 0) {
+                    if (rate_new === 0) {
+                        pmt_new_recalc = P_new / term_new;
+                    } else {
+                        pmt_new_recalc = P_new * (r_new * Math.pow(1 + r_new, term_new)) / (Math.pow(1 + r_new, term_new) - 1);
+                    }
+                }
+
+                const actual_monthly_payment = pmt_new_recalc + extraMonthly;
+
+                // Run Simulation B loop
+                let balanceB = P_new;
+                let totalInterestB = 0;
+                let actualMonthsB = 0;
+
+                // Base Schedule
+                let baseSchedule = [];
+                let balA = P_base;
+                const maxTerm = Math.max(term_base, term_new) + 12;
+
+                for (let i = 1; i <= maxTerm; i++) {
+                    if (i > term_base && balA <= 0) {
+                        baseSchedule.push({ pmt: 0, int: 0, princ: 0, bal: 0 });
+                        continue;
+                    }
+                    const intA = (balA > 0) ? balA * r_base : 0;
+                    let princA = 0;
+                    if (balA > 0) {
+                        princA = pmt_base - intA;
+                        if (i >= term_base || princA > balA) princA = balA;
+                    }
+                    balA -= princA;
+                    if (balA < 0) balA = 0;
+
+                    baseSchedule.push({ pmt: (princA + intA > 0) ? (princA + intA) : 0, int: intA, princ: princA, bal: balA });
+                    if (balA <= 0 && i > term_base) break;
+                }
+
+                // Sim Loop B
+                let date = new Date(startDateInput.value || new Date());
+                const tbody = document.getElementById('schedule-body_comp');
+                let html = '';
+                const maxSteps = 1200;
+
+                for (let i = 1; i <= maxSteps; i++) {
+                    const interestB = balanceB * r_new;
+                    let paymentB = actual_monthly_payment;
+                    let principalB = paymentB - interestB;
+
+                    if (balanceB + interestB < paymentB) {
+                        paymentB = balanceB + interestB;
+                        principalB = balanceB;
+                    }
+                    if (balanceB <= 0.001) {
+                        paymentB = 0;
+                        principalB = 0;
+                    }
+
+                    balanceB -= principalB;
+                    if (balanceB < 0) balanceB = 0;
+
+                    totalInterestB += interestB;
+                    if (paymentB > 0.01) actualMonthsB = i;
+
+                    // Format Row with Diffs
+                    const baseRow = baseSchedule[i - 1] || { pmt: 0, int: 0, princ: 0, bal: 0 };
+
+                    const pmtDiff = paymentB - baseRow.pmt;
+                    const intDiff = interestB - baseRow.int;
+                    const balDiff = balanceB - baseRow.bal;
+
+                    if (paymentB < 0.01 && baseRow.pmt < 0.01 && i > term_new) break;
+
+                    const getDiffHtml = (val, diff) => {
+                        if (Math.abs(val) < 0.01 && Math.abs(diff) < 0.01) return `<span style="color:var(--text-secondary); opacity:0.5">-</span>`;
+                        const sign = diff >= 0 ? '+' : '';
+                        let cls = 'diff-neutral';
+                        if (diff > 0.05) cls = 'diff-bad';
+                        if (diff < -0.05) cls = 'diff-good';
+                        return `${formatMoney(val)} <span class="diff ${cls}">(${sign}${formatMoney(diff)})</span>`;
+                    };
+
+                    html += `
+                        <tr>
+                            <td>${i}</td>
+                            <td>${getDiffHtml(paymentB, pmtDiff)}</td>
+                            <td>${getDiffHtml(interestB, intDiff)}</td>
+                            <td>${getDiffHtml(principalB, principalB - baseRow.princ)}</td>
+                            <td>${getDiffHtml(balanceB, balDiff)}</td>
+                        </tr>
+                    `;
+
+                    if (balanceB <= 0 && i > Math.max(term_base, term_new)) break;
+                }
+
+                tbody.innerHTML = html;
+
+                // --- CARDS UPDATE ---
+                document.getElementById('monthly-payment_comp').textContent = formatMoney(actual_monthly_payment);
+                const pmtDiffTotal = actual_monthly_payment - pmt_base;
+                const pmtDiffEl = document.getElementById('monthly-payment-diff_comp');
+                const pmtSign = pmtDiffTotal >= 0 ? '+' : '';
+                pmtDiffEl.textContent = `(${pmtSign}${formatMoney(pmtDiffTotal)})`;
+                pmtDiffEl.className = pmtDiffTotal > 0.01 ? 'diff-bad' : (pmtDiffTotal < -0.01 ? 'diff-good' : 'diff-neutral');
+
+                const interestSavings = total_interest_base - totalInterestB;
+                const intCard = document.getElementById('total-interest_comp');
+                intCard.textContent = formatMoney(totalInterestB);
+
+                const intDiffEl = document.getElementById('total-interest-diff_comp');
+                if (interestSavings >= 0) {
+                    intDiffEl.textContent = `Poupança: ${formatMoney(interestSavings)}`;
+                    intDiffEl.className = 'diff-good';
+                } else {
+                    intDiffEl.textContent = `Prejuízo: ${formatMoney(Math.abs(interestSavings))}`;
+                    intDiffEl.className = 'diff-bad';
+                }
+
+                document.getElementById('new-term_comp').textContent = `${actualMonthsB} meses`;
+                const monthsSaved = term_base - actualMonthsB;
+                const termDiffEl = document.getElementById('term-diff_comp');
+                const termSign = monthsSaved >= 0 ? '-' : '+';
+                termDiffEl.textContent = `(${termSign}${Math.abs(monthsSaved)} meses)`;
+                termDiffEl.className = monthsSaved > 0 ? 'diff-good' : (monthsSaved < 0 ? 'diff-bad' : 'diff-neutral');
+            };
+
+            // Init listeners for comp
+            const compInputs = [
+                'amount_comp', 'rate_comp', 'spread_comp', 'euribor-select_comp', 'term_comp',
+                'one-off-amort_comp', 'new-term_input_comp', 'new-spread_comp', 'extra-monthly_comp'
+            ];
+            compInputs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', calculateComp);
+            });
+
+            // Toggle Logic Comp
+            const updateRateVisibilityComp = () => {
+                const fixed = document.getElementById('rate-fixed_comp');
+                const fixedGroup = document.getElementById('fixed-rate-group_comp');
+                const varGroup = document.getElementById('variable-rate-group_comp');
+
+                if (fixed.checked) {
+                    fixedGroup.classList.remove('hidden');
+                    fixedGroup.style.display = 'flex';
+                    varGroup.classList.add('hidden');
+                    varGroup.style.display = 'none';
+                } else {
+                    fixedGroup.classList.add('hidden');
+                    fixedGroup.style.display = 'none';
+                    varGroup.classList.remove('hidden');
+                    varGroup.style.display = 'block';
+                }
+                calculateComp();
+            };
+
+            document.getElementById('rate-fixed_comp').addEventListener('change', updateRateVisibilityComp);
+            document.getElementById('rate-variable_comp').addEventListener('change', updateRateVisibilityComp);
+
+            // --- INIT APPLICATION ---
+            refreshEuriborSelects();
+            updateRateVisibility();
+            updateRateVisibilityComp();
+
+            // Fetch Live Rates
+            fetchRates();
+        });
+    </script>
+</body>
+
+</html>
