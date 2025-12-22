@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Crédito Premium</title>
-    <meta name="description" content="Simulação avançada de crédito e juros com tabelas de amortização detalhadas.">
+    <title>Simulador de Crédito</title>
+    <meta name="description" content="Simulação de crédito e juros com tabelas de amortização detalhadas.">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,10 +28,18 @@
                     <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
                 </svg>
-                <span>SimuladorPro</span>
+                <span>CreditCalc</span>
             </div>
 
-            <nav class="nav-menu">
+            <button class="menu-toggle" id="menu-toggle" aria-label="Menu Principal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 6H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M4 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    <path d="M4 18H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </button>
+
+            <nav class="nav-menu" id="nav-menu">
                 <a href="#home" class="nav-link active" data-target="view-home">Home</a>
                 <a href="#simulator" class="nav-link" data-target="view-simulator">Crédito</a>
                 <a href="#comparator" class="nav-link" data-target="view-comparator">Amortização</a>
@@ -358,6 +366,14 @@
             <p>Desenhado e Construído por <a href="https://carlosandrade.eu" target="_blank">Carlos Andrade</a></p>
             <p>&copy; 2025 carlosandrade.eu</p>
         </footer>
+
+        <!-- Back to Top Button -->
+        <button id="back-to-top" class="back-to-top" aria-label="Voltar ao topo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+        </button>
     </div>
     <script>
         // Define global callback for JSONP first
@@ -698,6 +714,41 @@
                             view.classList.add('active');
                         }
                     });
+
+                    // Close mobile menu if open
+                    document.getElementById('nav-menu').classList.remove('open');
+                    document.getElementById('menu-toggle').classList.remove('active');
+                });
+            });
+
+            // === MOBILE MENU TOGGLE ===
+            const menuToggle = document.getElementById('menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', () => {
+                    menuToggle.classList.toggle('active');
+                    navMenu.classList.toggle('open');
+                });
+            }
+
+            // === BACK TO TOP BUTTON ===
+            const backToTopBtn = document.getElementById('back-to-top');
+
+            // Show/Hide button on scroll
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+
+            // Scroll to top on click
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
             });
 
