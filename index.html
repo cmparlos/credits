@@ -55,7 +55,7 @@
             <div id="view-home" class="app-view app-dashboard-view active">
                 <div style="max-width: 1000px; margin: 0 auto; width: 100%;">
                     <header style="text-align: center; margin-bottom: 48px;">
-                        <h2 style="font-size: 2rem; margin-bottom: 12px;">Bem-vindo ao SimuladorPro</h2>
+                        <h2 style="font-size: 2rem; margin-bottom: 12px;">Bem-vindo ao CreditCalc</h2>
                         <p style="color: var(--text-secondary); font-size: 1.1rem;">
                             Ferramentas avançadas para gestão financeira do seu crédito habitação.
                         </p>
@@ -91,6 +91,7 @@
                             </p>
                             <span style="color: var(--accent-color); font-weight: 600;">Abrir Comparador →</span>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -581,58 +582,89 @@
                 scheduleBody.innerHTML = html;
             };
 
-            const fetchRates = () => {
-                const script = document.createElement('script');
-                script.src = 'https://api.allorigins.win/get?url=https://www.euribor-rates.eu/pt/taxas-euribor-actuais/&callback=updateEuriborRates';
-                script.onerror = () => console.warn('JSONP fetch failed');
-                document.body.appendChild(script);
-            };
-
-            // Handle JSONP Response via Event
-            document.addEventListener('euribor-updated', (e) => {
-                const data = e.detail;
+            const fetchRates = async () => {
                 try {
-                    if (!data || !data.contents) throw new Error('No data');
+                    // Fetch the Euribor rates page
+                    // Added timestamp to bypass AllOrigins cache
+                    const url = 'https://www.euribor-rates.eu/pt/taxas-euribor-actuais/';
+                    const apiUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url) + '&timestamp=' + new Date().getTime();
+
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+
+                    if (!data || !data.contents) {
+                        throw new Error('No data received from API');
+                    }
+
+                    // Check if the fetched page returned a 404 or other error (AllOrigins returns http_code)
+                    if (data.status && data.status.http_code && data.status.http_code >= 400) {
+                        throw new Error(`Remote site returned ${data.status.http_code}`);
+                    }
+
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.contents, 'text/html');
 
                     const map = [
-                        { key: '1 semana', labelBase: 'Euribor 1 Semana' },
+                        { key: 'semana', labelBase: 'Euribor 1 Semana' },
                         { key: '1 mês', labelBase: 'Euribor 1 Mês' },
                         { key: '3 meses', labelBase: 'Euribor 3 Meses' },
                         { key: '6 meses', labelBase: 'Euribor 6 Meses' },
                         { key: '12 meses', labelBase: 'Euribor 12 Meses' }
                     ];
 
-                    const rows = Array.from(doc.querySelectorAll('tr'));
                     const newRates = [];
 
-                    map.forEach(item => {
-                        const row = rows.find(r => r.textContent.toLowerCase().includes(item.key.toLowerCase()));
-                        if (row) {
-                            const tds = row.querySelectorAll('td');
-                            if (tds.length >= 2) {
-                                const valueText = tds[1].textContent.trim();
-                                const val = parseFloat(valueText.replace('%', '').replace(',', '.').trim());
-                                if (!isNaN(val)) {
-                                    newRates.push({
-                                        label: `${item.labelBase} (${val}%)`,
-                                        value: val
-                                    });
+                    // Try to find the rates table
+                    const tables = doc.querySelectorAll('table');
+
+                    for (let table of tables) {
+                        const rows = Array.from(table.querySelectorAll('tr'));
+
+                        for (let item of map) {
+                            const row = rows.find(r => {
+                                const text = r.textContent.toLowerCase();
+                                return text.includes(item.key.toLowerCase()) ||
+                                    text.includes(item.labelBase.toLowerCase());
+                            });
+
+                            if (row) {
+                                const tds = row.querySelectorAll('td');
+                                for (let td of tds) {
+                                    const text = td.textContent.trim();
+                                    // Look for percentage values
+                                    const match = text.match(/(-?\d+[.,]\d+)\s*%?/);
+                                    if (match) {
+                                        const cleanVal = match[1].replace(',', '.');
+                                        const val = parseFloat(cleanVal);
+                                        // Validate: reasonable interest rate range
+                                        if (!isNaN(val) && val > -5 && val < 15) {
+                                            newRates.push({
+                                                label: `${item.labelBase} (${val.toFixed(3)}%)`,
+                                                value: val
+                                            });
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
-                    });
+
+                        if (newRates.length > 0) break;
+                    }
 
                     if (newRates.length > 0) {
                         currentEuriborRates = newRates;
                         refreshEuriborSelects();
-                        showToast('Taxas Euribor atualizadas (Live)!');
+                        showToast('Taxas Euribor atualizadas com sucesso!');
+                    } else {
+                        console.warn('Não foi possível extrair as taxas. A usar valores padrão.');
+                        showToast('A usar taxas Euribor padrão (Parse Error)', true);
                     }
                 } catch (err) {
-                    console.warn('Scraping error:', err);
+                    console.warn('Erro ao buscar taxas Euribor:', err);
+                    showToast(`Erro: ${err.message}. A usar padrão.`, true);
                 }
-            });
+            };
 
             // === TOGGLE LOGIC (Direct Style Manipulation) ===
             const updateRateVisibility = () => {
@@ -994,5 +1026,6 @@
         });
     </script>
 </body>
+
 
 </html>

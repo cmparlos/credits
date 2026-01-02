@@ -585,7 +585,7 @@ tr:hover td {
 /* Footer */
 .app-footer {
     text-align: center;
-    padding: 24px 16px;
+    padding: 10px 16px;
     font-size: 0.85rem;
     color: var(--text-secondary);
     border-top: 1px solid var(--border-color);
@@ -644,4 +644,5 @@ tr:hover td {
         width: 44px;
         height: 44px;
     }
+
 }
